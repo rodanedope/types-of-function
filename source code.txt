@@ -1,0 +1,32 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+
+contract AE92Corolla is ERC20, Ownable {
+    mapping(address => bool) private _frozenAccounts;
+
+    constructor(string memory Account, string memory Currency, uint256 walletballance) ERC20(Account, Currency) Ownable(msg.sender) {}
+
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+    function burn(uint256 amount) public {
+        _burn(msg.sender, amount);
+    }
+    function isAccountFrozen(address account) public view returns (bool) {
+        return _frozenAccounts[account];
+    }
+    function _beforeTokenTransfer(address from, address to, uint256 amount) internal {
+      
+        _beforeTokenTransferCustom(from, to, amount);
+
+        if (from != address(0) && to != address(0)) {
+            require(!_frozenAccounts[from], "ERC20: sender account is frozen");
+            require(!_frozenAccounts[to], "ERC20: recipient account is frozen");
+        }
+    }
+    function _beforeTokenTransferCustom(address from, address to, uint256 amount) private {
+    }
+}
